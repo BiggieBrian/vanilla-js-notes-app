@@ -3,7 +3,9 @@ const pages = {
     <div class="bg-[#181818] rounded-xl p-5 flex justify-between shadow-xl">
       <h1>Saved Notes</h1>
       <button id="clear-button">Clear</button>
-    </div>`,
+    </div>
+    <div id="notesContainer"></div>
+    `,
   newNoteContent: `
     <div class="bg-black rounded-t-2xl p-5">
         <h1>Create a New Note</h1>
@@ -67,10 +69,20 @@ function newNoteFunctionality() {
 
   const formSubmit = (e) => {
     e.preventDefault();
-    title = noteTitle.value;
-    details = noteDetails.value;
+    title = noteTitle.value.trim();
+    details = noteDetails.value.trim();
+
+    if (title === "") {
+      alert("Add Note Title");
+      return;
+    }
+    if (details === "") {
+      alert("Add Note Details/Body");
+      return;
+    }
 
     const note = {
+      id: notesList.length + 1,
       title,
       details,
       date: new Date().toLocaleDateString(),
@@ -79,28 +91,48 @@ function newNoteFunctionality() {
     localStorage.setItem("notesList", JSON.stringify(notesList));
     noteForm.reset();
     savedNotesPage();
+    console.log(notesList);
   };
   noteForm.onsubmit = formSubmit;
 }
 function savedNotesFunctionality() {
+  const notesContainer = document.querySelector("#notesContainer");
   const loadNotes = () => {
     notesList.forEach((note) => {
       const noteTemplate = `
-    <div class="bg-black rounded-xl p-4 flex flex-col gap-4 my-8">
-        <span id="note-content">
-            <h1 class="text-2xl font-bold">${note.title}</h1>
-            <p>
-               ${note.details}
-            </p>
-        </span>
-       
-    </div>`;
-      content.innerHTML += noteTemplate;
+        <div class="bg-black rounded-xl p-4 flex justify-between gap-4 my-8">
+            <span id="note-content">
+                <h1 class="text-2xl font-bold">${note.title}</h1>
+                <p>
+                  ${note.details}
+                </p>
+            </span>
+            <button>Remove</button>  
+        </div>`;
+      notesContainer.innerHTML += noteTemplate;
     });
   };
   loadNotes();
+
+  //
+  const notes = notesContainer.children;
+  for (let i = 0; i < notes.length; i++) {
+    const note = notes[i];
+    const removeButton = note.lastElementChild;
+    removeButton.addEventListener("click", () => {
+      if (notesList.length > 1) {
+        notesList.splice(i, i);
+      } else {
+        notesList = [];
+        localStorage.clear();
+      }
+      savedNotesPage();
+    });
+  }
+
+  //
   const clearButton = document.querySelector("#clear-button");
-  console.log(clearButton);
+
   clearButton.addEventListener("click", () => {
     notesList = [];
     localStorage.clear();
