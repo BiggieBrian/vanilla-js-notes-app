@@ -2,6 +2,7 @@ const pages = {
   savedNotesContent: `
     <div class="bg-[#181818] rounded-xl p-5 flex justify-between shadow-xl">
       <h1>Saved Notes</h1>
+      <button id="clear-button">Clear</button>
     </div>`,
   newNoteContent: `
     <div class="bg-black rounded-t-2xl p-5">
@@ -37,17 +38,23 @@ const { savedNotesContent, newNoteContent } = pages;
 const tabs = document.querySelector(".mini-nav").children;
 const content = document.querySelector("#content");
 let notesList = [];
+const newNotesPage = () => {
+  content.innerHTML = newNoteContent;
+  newNoteFunctionality();
+};
+const savedNotesPage = () => {
+  content.innerHTML = savedNotesContent;
+  savedNotesFunctionality();
+};
 
 for (let i = 0; i < tabs.length; i++) {
   const tab = tabs[i];
   const tabId = tab.id;
   tab.addEventListener("click", () => {
     if (tabId === "saved") {
-      content.innerHTML = savedNotesContent;
-      savedNotesFunctionality();
+      savedNotesPage();
     } else {
-      content.innerHTML = newNoteContent;
-      newNoteFunctionality();
+      newNotesPage();
     }
   });
 }
@@ -68,16 +75,17 @@ function newNoteFunctionality() {
       details,
       date: new Date().toLocaleDateString(),
     };
-    notesList.push(note);
+    notesList.unshift(note);
     localStorage.setItem("notesList", JSON.stringify(notesList));
     noteForm.reset();
+    savedNotesPage();
   };
   noteForm.onsubmit = formSubmit;
 }
 function savedNotesFunctionality() {
-  console.log(notesList);
-  notesList.forEach((note) => {
-    const noteTemplate = `
+  const loadNotes = () => {
+    notesList.forEach((note) => {
+      const noteTemplate = `
     <div class="bg-black rounded-xl p-4 flex flex-col gap-4 my-8">
         <span id="note-content">
             <h1 class="text-2xl font-bold">${note.title}</h1>
@@ -87,7 +95,16 @@ function savedNotesFunctionality() {
         </span>
        
     </div>`;
-    content.innerHTML += noteTemplate;
+      content.innerHTML += noteTemplate;
+    });
+  };
+  loadNotes();
+  const clearButton = document.querySelector("#clear-button");
+  console.log(clearButton);
+  clearButton.addEventListener("click", () => {
+    notesList = [];
+    localStorage.clear();
+    savedNotesPage();
   });
 }
 window.onload = () => {
