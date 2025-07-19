@@ -120,12 +120,8 @@ function savedNotesFunctionality() {
     const note = notes[i];
     const removeButton = note.lastElementChild;
     removeButton.addEventListener("click", () => {
-      if (notesList.length > 1) {
-        notesList.splice(i, i);
-      } else {
-        notesList = [];
-        localStorage.clear();
-      }
+      notesList.splice(i, 1);
+      localStorage.setItem("notesList", JSON.stringify(notesList));
       savedNotesPage();
     });
   }
